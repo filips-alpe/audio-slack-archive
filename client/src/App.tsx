@@ -234,16 +234,16 @@ const ControlButtons = ({ status, setStatus, muted, setMuted, onHangUp }: Contro
           </RedButton>
         ))}
       {status === UserStatus.UNAVAILABLE && (
-        <GreenButton onClick={() => setStatus(UserStatus.AVAILABLE)}>AVAILABLE</GreenButton>
+        <GreenButton onClick={() => setStatus(UserStatus.AVAILABLE)}>JOIN</GreenButton>
       )}
-      {status !== UserStatus.UNAVAILABLE && (
+      {status === UserStatus.AVAILABLE && (
         <RedButton
           onClick={() => {
             onHangUp();
             setStatus(UserStatus.UNAVAILABLE);
           }}
         >
-          AWAY
+          LEAVE
         </RedButton>
       )}
     </ControlButtonContainer>
