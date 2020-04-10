@@ -73,9 +73,11 @@ const UserAvatar = styled.img<{ status: UserStatus }>`
 
 const renderUserCard = (user: User) => (
   <UserCard>
-    <UserAvatar src={user.avatar} alt={user.name} status={user.status} />
+    <UserAvatar src={user.avatar} alt={user.name} title={user.name} status={user.status} />
   </UserCard>
 );
+
+const sortByStatus = (users: User[]) => users.sort((a, b) => a.status - b.status);
 
 function App() {
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
@@ -85,7 +87,7 @@ function App() {
         <TeamList activeTeam={team} setActiveTeam={setActiveTeam} />
       </Sidebar>
       <Content>
-        <UserContainer>{team.users.map(renderUserCard)}</UserContainer>
+        <UserContainer>{sortByStatus(team.users).map(renderUserCard)}</UserContainer>
       </Content>
     </AppContainer>
   );
