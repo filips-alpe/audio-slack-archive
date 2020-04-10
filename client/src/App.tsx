@@ -175,7 +175,16 @@ function App() {
   return (
     <AppContainer>
       <Sidebar>
-        <TeamList activeTeam={team} setActiveTeam={setActiveTeam} />
+        <TeamList
+          team={team}
+          changeTeam={(team) => {
+            setActiveTeam(team);
+            if (status === UserStatus.CONNECTED) {
+              setCurrentUser({ ...currentUser, connections: [] });
+              setStatus(UserStatus.AVAILABLE);
+            }
+          }}
+        />
       </Sidebar>
       <Content status={status}>
         <UserContainer>

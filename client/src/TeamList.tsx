@@ -23,15 +23,15 @@ const TeamAvatar = styled.img`
 `;
 
 interface TeamListProps {
-  activeTeam: Team;
-  setActiveTeam(team: Team): void;
+  team: Team;
+  changeTeam(team: Team): void;
 }
 
-export function TeamList({ activeTeam, setActiveTeam }: TeamListProps) {
+export function TeamList({ team, changeTeam }: TeamListProps) {
   return (
     <>
       {teams.map((t) => (
-        <TeamLink key={t.name} active={t.name === activeTeam.name} onClick={() => setActiveTeam(t)}>
+        <TeamLink key={t.name} active={t.name === team.name} onClick={() => changeTeam(t)}>
           <TeamAvatar src={t.avatar} alt={t.name} />
         </TeamLink>
       ))}
