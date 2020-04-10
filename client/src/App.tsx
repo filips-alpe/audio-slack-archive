@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
+import { TeamList } from './TeamList';
 import { teams, Team } from './data';
 
 const AppContainer = styled.div`
@@ -25,24 +26,6 @@ const Content = styled.main`
   background: #2b2b2b;
 `;
 
-const TeamLink = styled.button<{ active: boolean }>`
-  width: 100%;
-  height: 100px;
-  max-height: 20vw;
-  padding: 10px;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  background: ${({ active }) => (active ? '#909090' : 'transparent')};
-  &:hover {
-    background: #a2a2a2;
-  }
-`;
-
-const TeamAvatar = styled.img`
-  max-width: 100%;
-`;
-
 function App() {
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   return (
@@ -52,23 +35,6 @@ function App() {
       </Sidebar>
       <Content>This team has {team.users.length} users</Content>
     </AppContainer>
-  );
-}
-
-interface TeamListProps {
-  activeTeam: Team;
-  setActiveTeam(team: Team): void;
-}
-
-function TeamList({ activeTeam, setActiveTeam }: TeamListProps) {
-  return (
-    <>
-      {teams.map((t) => (
-        <TeamLink active={t.name === activeTeam.name} onClick={() => setActiveTeam(t)}>
-          <TeamAvatar src={t.avatar} alt={t.name} />
-        </TeamLink>
-      ))}
-    </>
   );
 }
 
