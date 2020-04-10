@@ -5,7 +5,7 @@ import { teams, Team } from './data';
 const TeamLink = styled.button<{ active: boolean }>`
   width: calc(100% - 10px);
   height: 90px;
-  max-height: 20vw;
+  max-height: calc(20vw - 10px);
   padding: 10px;
   margin: 5px;
   border: none;
