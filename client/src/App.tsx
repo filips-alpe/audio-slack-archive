@@ -140,6 +140,7 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
 function App() {
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
+  const [muted, setMuted] = React.useState(false);
   const [currentUser, setCurrentUser] = React.useState<User>({
     id: 'yoda',
     name: 'Yoda',
@@ -182,7 +183,12 @@ function App() {
       <ControlButtons
         status={status}
         setStatus={setStatus}
-        onHangUp={() => setCurrentUser({ ...currentUser, connections: [] })}
+        muted={muted}
+        setMuted={setMuted}
+        onHangUp={() => {
+          setCurrentUser({ ...currentUser, connections: [] });
+          setMuted(false);
+        }}
       />
     </AppContainer>
   );
@@ -191,10 +197,12 @@ function App() {
 interface ControlButtonsProps {
   status: UserStatus;
   setStatus(status: UserStatus): void;
+  muted: boolean;
+  setMuted(muted: boolean): void;
   onHangUp(): void;
 }
 
-const ControlButtons = ({ status, setStatus, onHangUp }: ControlButtonsProps) => {
+const ControlButtons = ({ status, setStatus, muted, setMuted, onHangUp }: ControlButtonsProps) => {
   return (
     <ControlButtonContainer>
       {status === UserStatus.CONNECTED && (
@@ -207,6 +215,24 @@ const ControlButtons = ({ status, setStatus, onHangUp }: ControlButtonsProps) =>
           HANG UP
         </RedButton>
       )}
+      {status === UserStatus.CONNECTED &&
+        (muted ? (
+          <GreenButton
+            onClick={() => {
+              setMuted(false);
+            }}
+          >
+            UNMUTE
+          </GreenButton>
+        ) : (
+          <RedButton
+            onClick={() => {
+              setMuted(true);
+            }}
+          >
+            MUTE
+          </RedButton>
+        ))}
       {status === UserStatus.UNAVAILABLE && (
         <GreenButton onClick={() => setStatus(UserStatus.AVAILABLE)}>AVAILABLE</GreenButton>
       )}
