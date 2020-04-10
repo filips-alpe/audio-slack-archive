@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
+import css from '@emotion/css/macro';
 import { TeamList } from './TeamList';
 import { teams, Team, User, UserStatus } from './data';
 
@@ -21,11 +22,12 @@ const Sidebar = styled.aside`
   background: #b2b2b2;
 `;
 
-const Content = styled.main`
+const Content = styled.main<{ status: UserStatus }>`
   flex: 1;
   background: #2b2b2b;
   padding: 20px 20px 100px 20px;
   overflow: scroll;
+  filter: ${({ status }) => status === UserStatus.UNAVAILABLE && 'blur(5px)'};
 `;
 
 const UserContainer = styled.div`
@@ -68,6 +70,12 @@ const UserAvatar = styled.img<{ status: UserStatus }>`
   filter: ${({ status }) => (status === UserStatus.UNAVAILABLE ? 'grayscale(100%)' : 'none')};
   &:hover {
     filter: none;
+    ${({ status }) =>
+      status === UserStatus.UNAVAILABLE
+        ? css`
+            border-color: #d01919;
+          `
+        : ''};
   }
 `;
 
@@ -92,14 +100,14 @@ const Button = styled.button`
   outline: none;
 `;
 const GreenButton = styled(Button)`
-  border: 5px solid #16ab39;
+  border: 4px solid #16ab39;
   background: rgba(33, 186, 69, 0.2);
   &:hover {
     background: rgba(33, 186, 69, 0.6);
   }
 `;
 const RedButton = styled(Button)`
-  border: 5px solid #d01919;
+  border: 4px solid #d01919;
   background: rgba(208, 25, 25, 0.2);
   &:hover {
     background: rgba(208, 25, 25, 0.6);
@@ -116,25 +124,35 @@ const sortByStatus = (users: User[]) => users.sort((a, b) => a.status - b.status
 
 function App() {
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
+  const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   return (
     <AppContainer>
       <Sidebar>
         <TeamList activeTeam={team} setActiveTeam={setActiveTeam} />
       </Sidebar>
-      <Content>
+      <Content status={status}>
         <UserContainer>{sortByStatus(team.users).map(renderUserCard)}</UserContainer>
       </Content>
-      <ControlButtons />
+      <ControlButtons status={status} setStatus={setStatus} />
     </AppContainer>
   );
 }
 
-const ControlButtons = () => {
+interface ControlButtonsProps {
+  status: UserStatus;
+  setStatus(status: UserStatus): void;
+}
+
+const ControlButtons = ({ status, setStatus }: ControlButtonsProps) => {
   return (
     <ControlButtonContainer>
       <ControlButtonContainerSpacer />
-      <GreenButton>AVAILABLE</GreenButton>
-      <RedButton>AWAY</RedButton>
+      {status === UserStatus.UNAVAILABLE && (
+        <GreenButton onClick={() => setStatus(UserStatus.AVAILABLE)}>AVAILABLE</GreenButton>
+      )}
+      {status !== UserStatus.UNAVAILABLE && (
+        <RedButton onClick={() => setStatus(UserStatus.UNAVAILABLE)}>AWAY</RedButton>
+      )}
     </ControlButtonContainer>
   );
 };
