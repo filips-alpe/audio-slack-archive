@@ -63,7 +63,7 @@ const UserCard = styled.div<{ status: UserStatus }>`
     display: none;
   }
   &:hover > div {
-    display: block;
+    display: flex;
   }
 `;
 
@@ -81,20 +81,26 @@ const UserAvatar = styled.img<{ status: UserStatus }>`
   box-sizing: border-box;
 `;
 
-const UserName = styled.div`
+const UserNameContainer = styled.div`
   position: absolute;
   top: 0;
   width: 100%;
   height: 100%;
-  text-align: center;
   box-sizing: border-box;
-  text-align: center;
-  font-size: 1.4em;
-  font-weight: bold;
-  padding-top: 85%;
   border-radius: 15px;
-  color: white;
+  line-height: 1em;
+  font-size: 1.4em;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.7), transparent);
+  display: flex;
+`;
+
+const UserName = styled.div`
+  width: 100%;
+  padding-bottom: 15px;
+  align-self: flex-end;
+  text-align: center;
+  font-weight: bold;
+  color: white;
 `;
 
 const ControlButtonContainer = styled.footer`
@@ -132,7 +138,9 @@ const RedButton = styled(Button)`
 
 const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) => (
   <UserCard key={user.id} onClick={onClick} status={status}>
-    <UserName>{user.name}</UserName>
+    <UserNameContainer>
+      <UserName>{user.name}</UserName>
+    </UserNameContainer>
     <UserAvatar src={user.avatar} alt={user.name} title={user.name} status={status} />
   </UserCard>
 );
