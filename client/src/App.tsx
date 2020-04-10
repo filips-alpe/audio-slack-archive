@@ -24,7 +24,7 @@ const Sidebar = styled.aside`
 const Content = styled.main`
   flex: 1;
   background: #2b2b2b;
-  padding: 20px;
+  padding: 20px 20px 100px 20px;
   overflow: scroll;
 `;
 
@@ -71,6 +71,41 @@ const UserAvatar = styled.img<{ status: UserStatus }>`
   }
 `;
 
+const ControlButtonContainer = styled.footer`
+  position: fixed;
+  bottom: 0;
+  height: 80px;
+  display: flex;
+  width: 100vw;
+`;
+const ControlButtonContainerSpacer = styled.div`
+  width: 100px;
+  max-width: 20vw;
+`;
+const Button = styled.button`
+  flex: 1;
+  font-size: 2em;
+  opacity: 0.8;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+`;
+const GreenButton = styled(Button)`
+  border: 5px solid #16ab39;
+  background: rgba(33, 186, 69, 0.2);
+  &:hover {
+    background: rgba(33, 186, 69, 0.6);
+  }
+`;
+const RedButton = styled(Button)`
+  border: 5px solid #d01919;
+  background: rgba(208, 25, 25, 0.2);
+  &:hover {
+    background: rgba(208, 25, 25, 0.6);
+  }
+`;
+
 const renderUserCard = (user: User) => (
   <UserCard>
     <UserAvatar src={user.avatar} alt={user.name} title={user.name} status={user.status} />
@@ -89,8 +124,19 @@ function App() {
       <Content>
         <UserContainer>{sortByStatus(team.users).map(renderUserCard)}</UserContainer>
       </Content>
+      <ControlButtons />
     </AppContainer>
   );
 }
+
+const ControlButtons = () => {
+  return (
+    <ControlButtonContainer>
+      <ControlButtonContainerSpacer />
+      <GreenButton>AVAILABLE</GreenButton>
+      <RedButton>AWAY</RedButton>
+    </ControlButtonContainer>
+  );
+};
 
 export default App;
