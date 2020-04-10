@@ -3,14 +3,16 @@ import styled from '@emotion/styled/macro';
 import { teams, Team } from './data';
 
 const TeamLink = styled.button<{ active: boolean }>`
-  width: 100%;
-  height: 100px;
+  width: calc(100% - 10px);
+  height: 90px;
   max-height: 20vw;
   padding: 10px;
+  margin: 5px;
   border: none;
+  border-radius: 8px;
   outline: none;
   cursor: pointer;
-  background: ${({ active }) => (active ? '#909090' : 'transparent')};
+  background: ${({ active }) => (active ? '#909090' : '#676767')};
   &:hover {
     background: #a2a2a2;
   }
