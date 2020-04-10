@@ -1,4 +1,10 @@
-export type User = { name: string; avatar: string };
+export enum UserStatus {
+  CONNECTED,
+  AVAILABLE,
+  UNAVAILABLE,
+}
+
+export type User = { name: string; avatar: string; status: UserStatus };
 
 export type Team = { name: string; avatar: string; users: User[] };
 
@@ -11,14 +17,22 @@ export const teams = [
       {
         name: 'Elon Musk',
         avatar: 'https://i1.sndcdn.com/avatars-000343928089-mj2j87-t500x500.jpg',
+        status: UserStatus.CONNECTED,
       },
       {
         name: 'Kim Collins',
         avatar: 'https://randomuser.me/api/portraits/women/37.jpg',
+        status: UserStatus.CONNECTED,
       },
       {
         name: 'Joseph Arnold',
         avatar: 'https://randomuser.me/api/portraits/men/98.jpg',
+        status: UserStatus.AVAILABLE,
+      },
+      {
+        name: 'Carolyn Frazier',
+        avatar: 'https://randomuser.me/api/portraits/women/7.jpg',
+        status: UserStatus.UNAVAILABLE,
       },
     ],
   },

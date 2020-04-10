@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
 import { TeamList } from './TeamList';
-import { teams, Team, User } from './data';
+import { teams, Team, User, UserStatus } from './data';
 
 const AppContainer = styled.div`
   display: flex;
@@ -53,17 +53,27 @@ const UserCard = styled.div`
   width: 100%;
 `;
 
-const UserAvatar = styled.img`
+const UserAvatar = styled.img<{ status: UserStatus }>`
   width: 100%;
   height: 100%;
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid
+    ${({ status }) =>
+      status === UserStatus.CONNECTED
+        ? 'rgba(33, 150, 243, 0.7)'
+        : status === UserStatus.AVAILABLE
+        ? 'rgba(53, 236, 60, 0.7)'
+        : 'rgba(255, 255, 255, 0.1)'};
   border-radius: 15px;
   box-sizing: border-box;
+  filter: ${({ status }) => (status === UserStatus.UNAVAILABLE ? 'grayscale(100%)' : 'none')};
+  &:hover {
+    filter: none;
+  }
 `;
 
 const renderUserCard = (user: User) => (
   <UserCard>
-    <UserAvatar src={user.avatar} alt={user.name} />
+    <UserAvatar src={user.avatar} alt={user.name} status={user.status} />
   </UserCard>
 );
 
