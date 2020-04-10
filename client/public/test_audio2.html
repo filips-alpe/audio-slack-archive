@@ -12,10 +12,14 @@
 </body>
 <script>
 	const audio = document.querySelector('audio');
-		let id1 = 'yd8no3h8zp000004';
-		let id2 = 'yd8no3h8zp000005';
-		let id3 = 'yd8no3h8zp000006';
-	const me = new Peer();
+	let id1 = 'yd8no3h8zp000004';
+	let id2 = 'yd8no3h8zp000005';
+	let id3 = 'yd8no3h8zp000006';
+	const me = new Peer({
+		host: 'localhost',
+		port: 9000,
+		path: '/myapp'
+	});
 	me.on('open', on_peer_open);
 	const talk = new Set();
 
