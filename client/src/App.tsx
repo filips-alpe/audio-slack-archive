@@ -193,8 +193,13 @@ function App() {
             renderUserCard(u, getStatus(u), () => {
               const status = getStatus(u);
               if (status === UserStatus.AVAILABLE) {
-                setStatus(UserStatus.CONNECTED);
-                setCurrentUser({ ...currentUser, connections: [...currentUser.connections.concat(u.id)] });
+                navigator.mediaDevices
+                  .getUserMedia({ audio: true })
+                  .then(() => {
+                    setStatus(UserStatus.CONNECTED);
+                    setCurrentUser({ ...currentUser, connections: [...currentUser.connections.concat(u.id)] });
+                  })
+                  .catch(() => alert("Sadly you can't call anyone if you haven't enabled audio ¯\\_(ツ)_/¯"));
               }
             }),
           )}
