@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js"></script>
+
+
+</head>
+<body>
+<audio autoplay="autoplay"></audio>
+</body>
+<script>
+	const audio = document.querySelector('audio');
+	let id1 = 'yd8no3h8zp000001';
+	let id2 = 'yd8no3h8zp000002';
+	let id3 = 'yd8no3h8zp000003';
+	const me = new Peer(id2);
+	me.on('open', on_peer_open);
+
+	function on_peer_open() {
+		navigator.mediaDevices.getUserMedia({audio: true})
+		.then(stream => {
+			me.on('call', (call) => {
+				call.answer(stream); // Answer the call with an A/V stream.
+				call.on('stream', remoteStream => {
+					console.log('connected received');
+					debugger;
+					// audio.srcObject = stream;
+					// audio.srcObject = remoteStream;
+				});
+			});
+			call(id1, stream);
+
+		}).catch((err) => {
+			console.error('Failed to get local stream', err);
+		});
+	}
+
+	function call(personId, stream) {
+		const call = me.call(personId, stream);
+		call.on('stream', remoteStream => {
+			debugger;
+			console.log('connected initiated');
+			audio.srcObject = remoteStream;
+		});
+	}
+
+	// call('yd8no3h8zp000000', stream);
+</script>
+</html>
