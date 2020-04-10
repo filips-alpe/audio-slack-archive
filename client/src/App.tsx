@@ -59,11 +59,14 @@ const UserCard = styled.div<{ status: UserStatus }>`
     css`
       cursor: pointer;
     `}
-  & > div {
-    display: none;
-  }
-  &:hover > div {
-    display: flex;
+  @media screen and (min-width: 767px) {
+    & > div {
+      display: none;
+      font-size: 1.3em;
+    }
+    &:hover > div {
+      display: flex;
+    }
   }
 `;
 
@@ -89,7 +92,7 @@ const UserNameContainer = styled.div`
   box-sizing: border-box;
   border-radius: 15px;
   line-height: 1em;
-  font-size: 1.4em;
+  font-size: 0.9em;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.7), transparent);
   display: flex;
 `;
