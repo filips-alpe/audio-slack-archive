@@ -28,7 +28,7 @@
 				call.on('stream', remoteStream => {
 					console.log('connected received');
 					// audio.srcObject = stream;
-					// audio.srcObject = remoteStream;
+					audio.srcObject = remoteStream;
 				});
 				call.on('close', (x) => {
 					debugger;
