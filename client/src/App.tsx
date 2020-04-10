@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
+import { teams, Team } from './data';
 
 const AppContainer = styled.div`
   display: flex;
@@ -43,37 +44,27 @@ const TeamAvatar = styled.img`
 `;
 
 function App() {
+  const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   return (
     <AppContainer>
       <Sidebar>
-        <Teams />
+        <TeamList activeTeam={team} setActiveTeam={setActiveTeam} />
       </Sidebar>
-      <Content></Content>
+      <Content>This team has {team.users.length} users</Content>
     </AppContainer>
   );
 }
 
-function Teams() {
-  const teams = [
-    {
-      avatar:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/The_Boring_Company_Logo.svg/200px-The_Boring_Company_Logo.svg.png',
-      name: 'The Boring Company',
-    },
-    {
-      avatar: 'https://upload.wikimedia.org/wikipedia/commons/8/85/3M_CORPORATION.png',
-      name: '3M',
-    },
-    {
-      avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png',
-      name: 'NASA',
-    },
-  ];
-  const [activeTeam, setActiveTeam] = React.useState(teams[0].name);
+interface TeamListProps {
+  activeTeam: Team;
+  setActiveTeam(team: Team): void;
+}
+
+function TeamList({ activeTeam, setActiveTeam }: TeamListProps) {
   return (
     <>
       {teams.map((t) => (
-        <TeamLink active={t.name === activeTeam} onClick={() => setActiveTeam(t.name)}>
+        <TeamLink active={t.name === activeTeam.name} onClick={() => setActiveTeam(t)}>
           <TeamAvatar src={t.avatar} alt={t.name} />
         </TeamLink>
       ))}
