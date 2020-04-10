@@ -12,11 +12,11 @@
 </body>
 <script>
 	const audio = document.querySelector('audio');
-	let id1 = 'yd8no3h8zp000001';
-	let id2 = 'yd8no3h8zp000002';
-	let id3 = 'yd8no3h8zp000003';
+	let id1 = 'yd8no3h8zp000004';
+	let id2 = 'yd8no3h8zp000005';
+	let id3 = 'yd8no3h8zp000006';
 	const me = new Peer(id1);
-
+	const talk = new Set();
 	me.on('open', on_peer_open);
 
 	function on_peer_open() {
@@ -24,26 +24,25 @@
 		.then(stream => {
 			me.on('call', (call) => {
 				call.answer(stream); // Answer the call with an A/V stream.
+				talk.add(call.peer);
 				call.on('stream', remoteStream => {
 					console.log('connected received');
-					debugger;
 					// audio.srcObject = stream;
 					// audio.srcObject = remoteStream;
 				});
+				call.on('close', (x) => {
+					debugger;
+					talk.delete(call.peer);
+					console.log(`end call ${x}`)
+				});
 			});
-			// call(id, stream);
+			me.on('data', (data) => {
+				debugger;
+				console.log(data)
+			})
 
 		}).catch((err) => {
 			console.error('Failed to get local stream', err);
-		});
-	}
-
-	function call(personId, stream) {
-		const call = me.call(personId, stream);
-		call.on('stream', remoteStream => {
-			debugger;
-			console.log('connected initiated');
-			audio.srcObject = remoteStream;
 		});
 	}
 
