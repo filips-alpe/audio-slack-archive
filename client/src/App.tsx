@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
+import css from '@emotion/css/macro';
 import { TeamList } from './TeamList';
 import { teams, Team, User, UserStatus } from './data';
 
@@ -49,8 +50,21 @@ const UserContainer = styled.div`
   grid-gap: 10px;
 `;
 
-const UserCard = styled.div`
+const UserCard = styled.div<{ status: UserStatus }>`
   width: 100%;
+  position: relative;
+  line-height: 0;
+  ${({ status }) =>
+    status === UserStatus.AVAILABLE &&
+    css`
+      cursor: pointer;
+    `}
+  & > div {
+    display: none;
+  }
+  &:hover > div {
+    display: block;
+  }
 `;
 
 const UserAvatar = styled.img<{ status: UserStatus }>`
@@ -65,6 +79,22 @@ const UserAvatar = styled.img<{ status: UserStatus }>`
         : 'rgba(208, 25, 25, 0.7)'};
   border-radius: 15px;
   box-sizing: border-box;
+`;
+
+const UserName = styled.div`
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 1.4em;
+  font-weight: bold;
+  padding-top: 85%;
+  border-radius: 15px;
+  color: white;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.7), transparent);
 `;
 
 const ControlButtonContainer = styled.footer`
@@ -101,7 +131,8 @@ const RedButton = styled(Button)`
 `;
 
 const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) => (
-  <UserCard key={user.id} onClick={onClick}>
+  <UserCard key={user.id} onClick={onClick} status={status}>
+    <UserName>{user.name}</UserName>
     <UserAvatar src={user.avatar} alt={user.name} title={user.name} status={status} />
   </UserCard>
 );
