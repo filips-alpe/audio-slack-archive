@@ -31,7 +31,7 @@ export function TeamList({ activeTeam, setActiveTeam }: TeamListProps) {
   return (
     <>
       {teams.map((t) => (
-        <TeamLink active={t.name === activeTeam.name} onClick={() => setActiveTeam(t)}>
+        <TeamLink key={t.name} active={t.name === activeTeam.name} onClick={() => setActiveTeam(t)}>
           <TeamAvatar src={t.avatar} alt={t.name} />
         </TeamLink>
       ))}

@@ -76,10 +76,6 @@ const ControlButtonContainer = styled.footer`
   background: #2b2b2b;
   padding-top: 10px;
 `;
-const ControlButtonContainerSpacer = styled.div`
-  width: 100px;
-  max-width: 20vw;
-`;
 const Button = styled.button`
   flex: 1;
   font-size: 2em;
@@ -104,22 +100,35 @@ const RedButton = styled(Button)`
   }
 `;
 
-const renderUserCard = (user: User) => (
-  <UserCard>
-    <UserAvatar src={user.avatar} alt={user.name} title={user.name} status={user.status} />
+const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) => (
+  <UserCard key={user.id} onClick={onClick}>
+    <UserAvatar src={user.avatar} alt={user.name} title={user.name} status={status} />
   </UserCard>
 );
-
-const sortByStatus = (users: User[]) => users.sort((a, b) => a.status - b.status);
 
 function App() {
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
-  const currentUser = {
+  const [currentUser, setCurrentUser] = React.useState<User>({
+    id: 'yoda',
     name: 'Yoda',
     avatar: 'https://avatarfiles.alphacoders.com/125/125043.jpg',
-    status,
+    online: true,
+    connections: [],
+  });
+
+  const getStatus = (user: User) => {
+    if (currentUser.connections.includes(user.id)) {
+      return UserStatus.CONNECTED;
+    }
+    if (user.online) {
+      return UserStatus.AVAILABLE;
+    }
+    return UserStatus.UNAVAILABLE;
   };
+
+  const sortByStatus = (users: User[]) => users.sort((a, b) => getStatus(a) - getStatus(b));
+
   return (
     <AppContainer>
       <Sidebar>
@@ -127,11 +136,23 @@ function App() {
       </Sidebar>
       <Content status={status}>
         <UserContainer>
-          {renderUserCard(currentUser)}
-          {sortByStatus(team.users).map(renderUserCard)}
+          {renderUserCard(currentUser, status)}
+          {sortByStatus(team.users).map((u) =>
+            renderUserCard(u, getStatus(u), () => {
+              const status = getStatus(u);
+              if (status === UserStatus.AVAILABLE) {
+                setStatus(UserStatus.CONNECTED);
+                setCurrentUser({ ...currentUser, connections: [...currentUser.connections.concat(u.id)] });
+              }
+            }),
+          )}
         </UserContainer>
       </Content>
-      <ControlButtons status={status} setStatus={setStatus} />
+      <ControlButtons
+        status={status}
+        setStatus={setStatus}
+        onHangUp={() => setCurrentUser({ ...currentUser, connections: [] })}
+      />
     </AppContainer>
   );
 }
@@ -139,20 +160,34 @@ function App() {
 interface ControlButtonsProps {
   status: UserStatus;
   setStatus(status: UserStatus): void;
+  onHangUp(): void;
 }
 
-const ControlButtons = ({ status, setStatus }: ControlButtonsProps) => {
+const ControlButtons = ({ status, setStatus, onHangUp }: ControlButtonsProps) => {
   return (
     <ControlButtonContainer>
-      <ControlButtonContainerSpacer />
       {status === UserStatus.CONNECTED && (
-        <RedButton onClick={() => setStatus(UserStatus.AVAILABLE)}>HANG UP</RedButton>
+        <RedButton
+          onClick={() => {
+            onHangUp();
+            setStatus(UserStatus.AVAILABLE);
+          }}
+        >
+          HANG UP
+        </RedButton>
       )}
       {status === UserStatus.UNAVAILABLE && (
         <GreenButton onClick={() => setStatus(UserStatus.AVAILABLE)}>AVAILABLE</GreenButton>
       )}
       {status !== UserStatus.UNAVAILABLE && (
-        <RedButton onClick={() => setStatus(UserStatus.UNAVAILABLE)}>AWAY</RedButton>
+        <RedButton
+          onClick={() => {
+            onHangUp();
+            setStatus(UserStatus.UNAVAILABLE);
+          }}
+        >
+          AWAY
+        </RedButton>
       )}
     </ControlButtonContainer>
   );
