@@ -34,9 +34,17 @@
 	function call(personId, stream) {
 		const call = me.call(personId, stream);
 		call.on('stream', remoteStream => {
-			debugger;
 			console.log('connected initiated');
-			// audio.srcObject = remoteStream;
+			let audio = document.createElement('audio');
+			audio.setAttribute('autoplay', 'autoplay');
+			// audio.srcObject = stream;
+			audio.srcObject = remoteStream;
+			call.on('close', (x) => {
+				debugger;
+				audio = undefined;
+				talk.delete(call.peer);
+				console.log(`end call ${x}`)
+			});
 		});
 		// setTimeout(() => {
 		// 	console.log('closing call');
