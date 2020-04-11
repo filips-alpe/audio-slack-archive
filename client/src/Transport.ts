@@ -80,7 +80,7 @@ class Transport {
 
 	private onPeerConnection = (conn: DataConnection) => {
 		this.peers[conn.peer] = {conn, status: UserStatus.AVAILABLE};
-		debugger;
+		// debugger;
 		conn.on('open', () => {
 			this.setConnection(conn);
 			conn.send({type: 'status', status: this.status});
@@ -89,7 +89,7 @@ class Transport {
 
 	private setConnection = (conn: DataConnection) => {
 		conn.on('close', () => {
-			debugger;
+			// debugger;
 			const peer = this.peers[conn.peer];
 			peer.conn = undefined;
 			peer.status = UserStatus.UNAVAILABLE;
@@ -100,7 +100,7 @@ class Transport {
 				case 'status':
 					if (!(conn.peer in this.talk)) {
 						let nextStatus = (data as StatusMessage).status;
-						debugger;
+						// debugger;
 						this.peers[conn.peer].status = nextStatus;
 						this.onPeersChanged(this.peers);
 					}
@@ -120,7 +120,7 @@ class Transport {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onPeersChanged(this.peers);
-			debugger;
+			// debugger;
 			const remove_stream = this.renderAudioStream(remoteStream);
 			call.on('close', () => {
 				remove_stream();

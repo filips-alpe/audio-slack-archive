@@ -48,6 +48,13 @@ export const teams: Team[] = [
         online: true,
         connections: [],
       },
+      {
+        id: '5',
+        name: 'Yoda',
+        avatar: 'https://avatarfiles.alphacoders.com/125/125043.jpg',
+        online: true,
+        connections: [],
+      },
     ],
   },
   {
