@@ -1,5 +1,5 @@
-import Peer, { DataConnection, MediaConnection } from 'peerjs';
-import { UserStatus } from './data';
+import Peer, {DataConnection, MediaConnection} from 'peerjs';
+import {UserStatus} from './data';
 
 const HOST = 'emergency.walmoo.com';
 const PORT = 9000;
@@ -17,7 +17,7 @@ export interface TransportOptions {
 }
 
 export class Transport {
-	peerApp = new Peer({ host: HOST, port: PORT });
+	peerApp = new Peer({host: HOST, port: PORT, secure: true});
 	peers: { [key: string]: { conn?: DataConnection } & Status } = {};
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
@@ -58,7 +58,7 @@ export class Transport {
 		this.status = status;
 		for (let peer of Object.values(this.peers)) {
 			if (peer.conn) {
-				peer.conn.send({ type: 'status', status: this.status });
+				peer.conn.send({type: 'status', status: this.status});
 			}
 		}
 	}
@@ -66,22 +66,22 @@ export class Transport {
 	private onPeerOpen = (myId: string) => {
 		debugger;
 		this.initStream();
-		this.peerApp.listAllPeers(ids => ids.filter(id=>id!==myId).forEach(
+		this.peerApp.listAllPeers(ids => ids.filter(id => id !== myId).forEach(
 			id => {
 				const conn = this.peerApp.connect(id);
-				conn.on('open',()=>this.setConnection(conn));
-				this.peers[id] = { conn, status: UserStatus.UNAVAILABLE };
+				conn.on('open', () => this.setConnection(conn));
+				this.peers[id] = {conn, status: UserStatus.UNAVAILABLE};
 			}
 		));
 		console.log(`onPeerOpen ${myId}`);
 	};
 
 	private onPeerConnection = (conn: DataConnection) => {
-		this.peers[conn.peer] = { conn, status: UserStatus.AVAILABLE };
+		this.peers[conn.peer] = {conn, status: UserStatus.AVAILABLE};
 		debugger;
-		conn.on('open',()=>{
+		conn.on('open', () => {
 			this.setConnection(conn);
-			conn.send({ type: 'status', status: this.status });
+			conn.send({type: 'status', status: this.status});
 		});
 	};
 
@@ -130,14 +130,14 @@ export class Transport {
 	};
 
 	private async initStream() {
-		this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+		this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
 	}
 
 	private askToCall = (id: string) => {
 		for (let conn of Object.values(this.talk)) {
 			const peer = this.peers[conn.peer];
 			if (peer.conn) {
-				peer.conn.send({ type: 'call', call: id });
+				peer.conn.send({type: 'call', call: id});
 			}
 		}
 	};
