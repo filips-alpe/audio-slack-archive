@@ -10,27 +10,24 @@ type MessageType = { type: 'call' | 'status' }
 type CallMessage = { callId: string } & MessageType
 type StatusMessage = Status & MessageType
 
-class Transport {
+export class Transport {
 	peerApp = new Peer({host: HOST, port: PORT});
 	peers: { [key: string]: { conn?: DataConnection } & Status } = {};
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
-	isPrivateTalk = false;
+	public isPrivateTalk = false;
 
 	id?: string;
 	stream?: MediaStream;
 
-	onConnect: (id: string) => void;
-	onDisconnect: () => void;
+	onStatusChange: (id: string, status: UserStatus) => void;
 	onBusy: (id: string) => void;
 
 	constructor(
-		onConnect: (id: string) => void,
-		onDisconnect: () => void,
+		onStatusChange: (id: string, status: UserStatus) => void,
 		onBusy: (id: string) => void,
 	) {
-		this.onConnect = onConnect;
-		this.onDisconnect = onDisconnect;
+		this.onStatusChange = onStatusChange;
 		this.onBusy = onBusy;
 		this.peerApp.on('open', this.onPeerOpen);
 		this.peerApp.on('connection', this.onPeerConnection);
@@ -89,8 +86,9 @@ class Transport {
 			switch (data.type) {
 				case "status":
 					if (!(conn.peer in this.talk)) {
-						this.peers[conn.peer].status = (<StatusMessage>data).status;
-						this.onConnect(conn.peer);
+						let nextStatus = (<StatusMessage>data).status;
+						this.peers[conn.peer].status = nextStatus;
+						this.onStatusChange(conn.peer, nextStatus);
 					}
 					break;
 				case "call":
@@ -106,7 +104,7 @@ class Transport {
 			if (this.status !== UserStatus.CONNECTED) {
 				this.setStatus(UserStatus.CONNECTED);
 			}
-			this.onConnect(call.peer);
+			this.onStatusChange(call.peer, UserStatus.CONNECTED);
 			//	TODO create audio tag and link it to remote stream
 		});
 		call.on('close', () => {
@@ -114,7 +112,7 @@ class Transport {
 			delete this.talk[call.peer];
 			if (!Object.keys(this.talk).length) {
 				this.setStatus(UserStatus.AVAILABLE);
-				this.onDisconnect();
+				this.onStatusChange(call.peer, UserStatus.AVAILABLE);
 			}
 		});
 	}

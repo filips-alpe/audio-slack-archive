@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
 import css from '@emotion/css/macro';
-import { TeamList } from './TeamList';
-import { teams, Team, User, UserStatus } from './data';
+import {TeamList} from './TeamList';
+import {Team, teams, User, UserStatus} from './data';
+import {Transport} from "./Transport";
 
 const AppContainer = styled.div`
   display: flex;
@@ -149,6 +150,12 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
 );
 
 function App() {
+
+  const transport = new Transport(
+    (id, status)=>console.log(`peer ${id} new status ${status}`),
+    (id)=>console.log(`peer ${id} calling, but i am busy`),
+  );
+
 
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
