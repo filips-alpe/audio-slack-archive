@@ -149,6 +149,7 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
 );
 
 function App() {
+
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);
