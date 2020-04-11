@@ -15,7 +15,7 @@ export type Peers = { [key: string]: { conn?: DataConnection } & Status };
 export interface TransportOptions {
 	onPeersChanged: (peers: Peers) => void;
 	onBusy: (id: string) => void;
-	setAudioStream: (stream: MediaStream | null) => void;
+	renderAudioStream: (stream: MediaStream) => () => void;
 }
 
 export class Transport {
@@ -23,7 +23,7 @@ export class Transport {
 	public peers: Peers = {};
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
-	private setAudioStream: (stream: MediaStream | null) => void;
+	private renderAudioStream: (stream: MediaStream) => () => void;
 	public isPrivateTalk = false;
 
 	stream?: MediaStream;
@@ -34,7 +34,7 @@ export class Transport {
 	constructor(options: TransportOptions) {
 		this.onPeersChanged = options.onPeersChanged;
 		this.onBusy = options.onBusy;
-		this.setAudioStream = options.setAudioStream;
+		this.renderAudioStream = options.renderAudioStream;
 		this.peerApp.on('open', this.onPeerOpen);
 		this.peerApp.on('connection', this.onPeerConnection);
 		this.peerApp.on('call', this.onCall);
@@ -119,10 +119,10 @@ export class Transport {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onPeersChanged(this.peers);
-			this.setAudioStream(remoteStream);
+			this.renderAudioStream(remoteStream);
 		});
 		call.on('close', () => {
-			this.setAudioStream(null);
+			// remove streams
 			delete this.talk[call.peer];
 			if (!Object.keys(this.talk).length) {
 				this.setStatus(UserStatus.AVAILABLE);

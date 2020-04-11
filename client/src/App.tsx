@@ -150,7 +150,7 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
 );
 
 function App() {
-  let audioStream: MediaStream | null;
+  const audioStreams: { [key: string]: MediaStream } = {};
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setComponentStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);
@@ -169,9 +169,13 @@ function App() {
       console.log('new peers', peers);
     },
     onBusy: (id) => console.log(`peer ${id} calling, but i am busy`),
-    setAudioStream: (stream) => {
-      console.log('acquired audio stream', audioStream);
-      audioStream = stream;
+    renderAudioStream: (stream) => {
+      const uniqueId = 'asdf';
+      audioStreams[uniqueId] = stream;
+      console.log('acquired audio stream', stream);
+      return () => {
+        delete audioStreams[uniqueId];
+      };
     },
   });
   const setStatus = (status: UserStatus) => {
