@@ -55,24 +55,31 @@ export class Transport {
 		}
 	}
 
-	private onPeerOpen = (id: string) => {
+	private onPeerOpen = (myId: string) => {
+		debugger;
 		this.initStream();
-		this.peerApp.listAllPeers(this.initPeers);
-		console.log(`onPeerOpen ${id}`);
+		this.peerApp.listAllPeers(ids => ids.filter(id=>id!==myId).forEach(
+			id => {
+				const conn = this.peerApp.connect(id);
+				conn.on('open',()=>this.setConnection(conn));
+				this.peers[id] = { conn, status: UserStatus.UNAVAILABLE };
+			}
+		));
+		console.log(`onPeerOpen ${myId}`);
 	};
 
 	private onPeerConnection = (conn: DataConnection) => {
 		this.peers[conn.peer] = { conn, status: UserStatus.AVAILABLE };
-		conn.send({ type: 'status', status: this.status });
-		this.setConnection(conn);
-	};
-
-	private initPeers = (ids: string[]) => {
-		ids.forEach((id) => this.setConnection(this.peerApp.connect(id)));
+		debugger;
+		conn.on('open',()=>{
+			this.setConnection(conn);
+			conn.send({ type: 'status', status: this.status });
+		});
 	};
 
 	private setConnection = (conn: DataConnection) => {
 		conn.on('close', () => {
+			debugger;
 			const peer = this.peers[conn.peer];
 			peer.conn = undefined;
 			peer.status = UserStatus.UNAVAILABLE;
