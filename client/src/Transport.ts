@@ -18,12 +18,13 @@ export interface TransportOptions {
 	renderAudioStream: (stream: MediaStream) => () => void;
 }
 
-export class Transport {
-	peerApp = new Peer({host: HOST, port: PORT, secure: true});
+class Transport {
 	public peers: Peers = {};
+	public isPrivateTalk = false;
+
+	peerApp = new Peer({host: HOST, port: PORT, secure: true});
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
-	public isPrivateTalk = false;
 	stream?: MediaStream;
 
 	renderAudioStream: (stream: MediaStream) => () => void;
@@ -52,7 +53,6 @@ export class Transport {
 		for (let conn of Object.values(this.talk)) {
 			conn.close();
 		}
-		this.setStatus(UserStatus.AVAILABLE);
 	}
 
 	public setStatus(status: UserStatus) {
@@ -65,7 +65,6 @@ export class Transport {
 	}
 
 	private onPeerOpen = (myId: string) => {
-		debugger;
 		this.initStream();
 		this.peerApp.listAllPeers(ids => ids.filter(id => id !== myId).forEach(
 			id => {
@@ -114,18 +113,21 @@ export class Transport {
 	private setCall = (call: MediaConnection) => {
 		call.on('stream', (remoteStream) => {
 			this.talk[call.peer] = call;
+			this.peers[call.peer].status = UserStatus.CONNECTED;
 			if (this.status !== UserStatus.CONNECTED) {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onPeersChanged(this.peers);
+			debugger;
 			const remove_stream = this.renderAudioStream(remoteStream);
 			call.on('close', () => {
 				remove_stream();
 				delete this.talk[call.peer];
+				this.peers[call.peer].status = UserStatus.AVAILABLE;
 				if (!Object.keys(this.talk).length) {
 					this.setStatus(UserStatus.AVAILABLE);
-					this.onPeersChanged(this.peers);
 				}
+				this.onPeersChanged(this.peers);
 			});
 		});
 	};
