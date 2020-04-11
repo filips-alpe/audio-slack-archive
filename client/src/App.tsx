@@ -151,16 +151,8 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
 
 function App() {
   let audioStream: MediaStream | null;
-  const transport = getTransport({
-    onStatusChange: (id, status) => console.log(`peer ${id} new status ${status}`),
-    onBusy: (id) => console.log(`peer ${id} calling, but i am busy`),
-    setAudioStream: (stream) => {
-      console.log('acquired audio stream', audioStream);
-      audioStream = stream;
-    },
-  });
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
-  const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
+  const [status, setComponentStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);
   const [currentUser, setCurrentUser] = React.useState<User>({
     id: 'yoda',
@@ -169,6 +161,20 @@ function App() {
     online: true,
     connections: [],
   });
+  const transport = getTransport({
+    onStatusChange: (id, status) => {
+      console.log(`peer ${id} new status ${status}`);
+    },
+    onBusy: (id) => console.log(`peer ${id} calling, but i am busy`),
+    setAudioStream: (stream) => {
+      console.log('acquired audio stream', audioStream);
+      audioStream = stream;
+    },
+  });
+  const setStatus = (status: UserStatus) => {
+    transport.setStatus(status);
+    setComponentStatus(status);
+  };
 
   const getStatus = (user: User) => {
     if (currentUser.connections.includes(user.id)) {
@@ -215,6 +221,7 @@ function App() {
         muted={muted}
         setMuted={setMuted}
         onHangUp={() => {
+          transport.hangUp();
           setCurrentUser({ ...currentUser, connections: [] });
           transport.hangUp();
           setMuted(false);
