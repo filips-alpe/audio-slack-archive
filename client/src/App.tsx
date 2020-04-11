@@ -205,6 +205,9 @@ function App() {
   };
 
   const getStatus = (user: User) => {
+    if (transportState.peers[user.id]) {
+      return transportState.peers[user.id].status;
+    }
     const talkingTo = Object.keys(transportState.talk);
     const available = Object.keys(transportState.peers);
     if (talkingTo.includes(user.id)) {
