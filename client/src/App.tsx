@@ -149,21 +149,26 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
   </UserCard>
 );
 
-const AudioList = ({ streams }: { streams: { [key: string]: MediaStream } }) => {
-  const setAudioSource = (key: string, el: HTMLAudioElement) => {
-    el.srcObject = streams[key];
-  };
-  return (
-    <>
-      {Object.keys(streams).map((key) => (
-        <audio preload="auto" autoPlay ref={(el) => el && setAudioSource(key, el)} />
-      ))}
-    </>
-  );
+let audioStreams: MediaStream[] = [];
+
+const addAudioStream = (stream: MediaStream) => {
+  const audio = document.createElement('audio');
+  audio.id = stream.id;
+  audio.setAttribute('autoplay', 'autoplay');
+  audio.setAttribute('preload', 'auto');
+  audio.srcObject = stream;
+  audioStreams.push(stream);
+};
+
+const removeAudioStream = (stream: MediaStream) => {
+  const audio = document.getElementById(stream.id);
+  if (audio) {
+    audio.remove();
+  }
+  audioStreams = audioStreams.filter((s) => s.id !== stream.id);
 };
 
 function App() {
-  const audioStreams: { [key: string]: MediaStream } = {};
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setComponentStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);
@@ -177,10 +182,9 @@ function App() {
     },
     onBusy: (id) => console.log(`peer ${id} calling, but i am busy`),
     renderAudioStream: (stream) => {
-      audioStreams[stream.id] = stream;
-      console.log('acquired audio stream', stream);
+      addAudioStream(stream);
       return () => {
-        delete audioStreams[stream.id];
+        removeAudioStream(stream);
       };
     },
   });
@@ -203,7 +207,6 @@ function App() {
 
   return (
     <AppContainer>
-      <AudioList streams={audioStreams} />
       <Sidebar>
         <TeamList
           team={team}
