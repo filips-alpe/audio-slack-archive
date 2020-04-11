@@ -39,11 +39,6 @@ export const teams: Team[] = [
       },
       {
         id: '5',
-        name: 'Yoda',
-        avatar: 'https://avatarfiles.alphacoders.com/125/125043.jpg',
-      },
-      {
-        id: '5',
         name: 'Pat Burns',
         avatar: 'https://randomuser.me/api/portraits/men/50.jpg',
       },
