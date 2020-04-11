@@ -26,6 +26,7 @@ class Transport {
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
 	stream?: MediaStream;
+	myId?: string;
 
 	renderAudioStream: (stream: MediaStream) => () => void;
 	onPeersChanged: (peers: Peers) => void;
@@ -41,7 +42,7 @@ class Transport {
 	}
 
 	public call(id: string, join = true) {
-		if (this.stream) {
+		if (this.stream && this.myId && this.myId != id) {
 			this.setCall(this.peerApp.call(id, this.stream));
 			if (join) {
 				this.askToCall(id);
@@ -66,6 +67,7 @@ class Transport {
 
 	private onPeerOpen = (myId: string) => {
 		this.initStream();
+		this.myId = myId;
 		this.peerApp.listAllPeers(ids => ids.filter(id => id !== myId).forEach(
 			id => {
 				const conn = this.peerApp.connect(id);
