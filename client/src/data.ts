@@ -18,6 +18,31 @@ export const teams: Team[] = [
     name: '3M',
     users: [
       {
+        id: '1',
+        name: 'Elon Musk',
+        avatar: 'https://i1.sndcdn.com/avatars-000343928089-mj2j87-t500x500.jpg',
+      },
+      {
+        id: '2',
+        name: 'Kim Collins',
+        avatar: 'https://randomuser.me/api/portraits/women/37.jpg',
+      },
+      {
+        id: '3',
+        name: 'Joseph Arnold',
+        avatar: 'https://randomuser.me/api/portraits/men/98.jpg',
+      },
+      {
+        id: '4',
+        name: 'Carolyn Frazier',
+        avatar: 'https://randomuser.me/api/portraits/women/7.jpg',
+      },
+      {
+        id: '5',
+        name: 'Yoda',
+        avatar: 'https://avatarfiles.alphacoders.com/125/125043.jpg',
+      },
+      {
         id: '5',
         name: 'Pat Burns',
         avatar: 'https://randomuser.me/api/portraits/men/50.jpg',
