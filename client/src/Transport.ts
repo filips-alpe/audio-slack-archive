@@ -47,6 +47,15 @@ class Transport {
 		this.peerApp.on('call', this.onCall);
 	}
 
+  public getState() {
+    return {
+      myId: this.myId,
+      status: this.status,
+      talk: this.talk,
+      peers: this.peers,
+    };
+  }
+
 	public call(id: string, join = true) {
 		if (this.stream && this.myId && this.myId != id) {
 			this.setCall(this.peerApp.call(id, this.stream));

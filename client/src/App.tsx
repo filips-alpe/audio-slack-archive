@@ -173,12 +173,10 @@ function App() {
   const [status, setComponentStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);
   const [peers, setPeers] = React.useState<Peers>({});
-  const [currentUser, setCurrentUser] = React.useState<User>();
 
   const transport = getTransport({
     onPeersChanged: (newPeers: Peers) => {
       setPeers(newPeers);
-      console.log('new peers', peers);
     },
     onBusy: (id) => console.log(`peer ${id} calling, but i am busy`),
     renderAudioStream: (stream) => {
@@ -188,22 +186,36 @@ function App() {
       };
     },
   });
+
+  const transportState = transport.getState();
+
+  const currentUser = team.users.find((u) => u.id === transportState.myId);
+
   const setStatus = (status: UserStatus) => {
     transport.setStatus(status);
     setComponentStatus(status);
   };
 
   const getStatus = (user: User) => {
-    if (currentUser && currentUser.connections.includes(user.id)) {
-      return UserStatus.CONNECTED;
-    }
-    if (user.online) {
+    if (Object.keys(transportState.peers).includes(user.id)) {
       return UserStatus.AVAILABLE;
+    }
+    if (user.id === transportState.myId) {
+      return transportState.status;
     }
     return UserStatus.UNAVAILABLE;
   };
 
-  const sortByStatus = (users: User[]) => users.sort((a, b) => getStatus(a) - getStatus(b));
+  const sortByStatus = (users: User[]) =>
+    users.sort((a, b) => {
+      if (a.id === currentUser?.id) {
+        return -100;
+      }
+      if (b.id === currentUser?.id) {
+        return 100;
+      }
+      return getStatus(a) - getStatus(b);
+    });
 
   return (
     <AppContainer>
@@ -213,7 +225,6 @@ function App() {
           changeTeam={(team) => {
             setActiveTeam(team);
             if (status === UserStatus.CONNECTED) {
-              currentUser && setCurrentUser({ ...currentUser, connections: [] });
               setStatus(UserStatus.AVAILABLE);
             }
           }}
@@ -237,8 +248,6 @@ function App() {
         muted={muted}
         setMuted={setMuted}
         onHangUp={() => {
-          transport.hangUp();
-          currentUser && setCurrentUser({ ...currentUser, connections: [] });
           transport.hangUp();
           setMuted(false);
         }}
