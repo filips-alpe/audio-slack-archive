@@ -3,7 +3,7 @@ import styled from '@emotion/styled/macro';
 import css from '@emotion/css/macro';
 import { TeamList } from './TeamList';
 import { Team, teams, User, UserStatus } from './data';
-import { Transport } from './Transport';
+import { getInstance as getTransport } from './Transport';
 
 const AppContainer = styled.div`
   display: flex;
@@ -149,12 +149,16 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
   </UserCard>
 );
 
-const transport = new Transport(
-  (id, status) => console.log(`peer ${id} new status ${status}`),
-  (id) => console.log(`peer ${id} calling, but i am busy`),
-);
-
 function App() {
+  let audioStream: MediaStream | null;
+  const transport = getTransport({
+    onStatusChange: (id, status) => console.log(`peer ${id} new status ${status}`),
+    onBusy: (id) => console.log(`peer ${id} calling, but i am busy`),
+    setAudioStream: (stream) => {
+      console.log('acquired audio stream', audioStream);
+      audioStream = stream;
+    },
+  });
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);

@@ -10,11 +10,18 @@ type MessageType = { type: 'call' | 'status' };
 type CallMessage = { callId: string } & MessageType;
 type StatusMessage = Status & MessageType;
 
+export interface TransportOptions {
+	onStatusChange: (id: string, status: UserStatus) => void;
+	onBusy: (id: string) => void;
+	setAudioStream: (stream: MediaStream | null) => void;
+}
+
 export class Transport {
 	peerApp = new Peer({ host: HOST, port: PORT });
 	peers: { [key: string]: { conn?: DataConnection } & Status } = {};
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
+	private setAudioStream: (stream: MediaStream | null) => void;
 	public isPrivateTalk = false;
 
 	stream?: MediaStream;
@@ -22,9 +29,10 @@ export class Transport {
 	onStatusChange: (id: string, status: UserStatus) => void;
 	onBusy: (id: string) => void;
 
-	constructor(onStatusChange: (id: string, status: UserStatus) => void, onBusy: (id: string) => void) {
-		this.onStatusChange = onStatusChange;
-		this.onBusy = onBusy;
+	constructor(options: TransportOptions) {
+		this.onStatusChange = options.onStatusChange;
+		this.onBusy = options.onBusy;
+		this.setAudioStream = options.setAudioStream;
 		this.peerApp.on('open', this.onPeerOpen);
 		this.peerApp.on('connection', this.onPeerConnection);
 		this.peerApp.on('call', this.onCall);
@@ -89,14 +97,14 @@ export class Transport {
 			switch (data.type) {
 				case 'status':
 					if (!(conn.peer in this.talk)) {
-						let nextStatus = (<StatusMessage>data).status;
+						let nextStatus = (data as StatusMessage).status;
 						debugger;
 						this.peers[conn.peer].status = nextStatus;
 						this.onStatusChange(conn.peer, nextStatus);
 					}
 					break;
 				case 'call':
-					this.call((<CallMessage>data).callId, false);
+					this.call((data as CallMessage).callId, false);
 					break;
 			}
 		});
@@ -109,10 +117,10 @@ export class Transport {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onStatusChange(call.peer, UserStatus.CONNECTED);
-			//	TODO create audio tag and link it to remote stream
+			this.setAudioStream(remoteStream);
 		});
 		call.on('close', () => {
-			//	TODO remove audio tag
+			this.setAudioStream(null);
 			delete this.talk[call.peer];
 			if (!Object.keys(this.talk).length) {
 				this.setStatus(UserStatus.AVAILABLE);
@@ -147,3 +155,11 @@ export class Transport {
 		this.setCall(call);
 	};
 }
+
+let transport: Transport;
+export const getInstance = (options: TransportOptions) => {
+	if (!transport) {
+		transport = new Transport(options);
+	}
+	return transport;
+};
