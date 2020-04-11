@@ -14,7 +14,7 @@
 	let id1 = 'yd8no3h8zp000004';
 	let id2 = 'yd8no3h8zp000005';
 	let id3 = 'yd8no3h8zp000006';
-	const me = new Peer({'iceServers': [{'urls': ['stun:stun.l.google.com:19302']}]});
+	const me = new Peer({config: {iceServers: [{url: 'stun:stun.l.google.com:19302'}]}});
 	// const me = new Peer({host: 'emergency.walmoo.com', port: 9000, secure: true});
 	// const me = new Peer({host: 'localhost', port: 9000});
 	me.on('open', on_peer_open);
