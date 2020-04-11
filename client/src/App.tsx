@@ -149,6 +149,19 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
   </UserCard>
 );
 
+const AudioList = ({ streams }: { streams: { [key: string]: MediaStream } }) => {
+  const setAudioSource = (key: string, el: HTMLAudioElement) => {
+    el.srcObject = streams[key];
+  };
+  return (
+    <>
+      {Object.keys(streams).map((key) => (
+        <audio preload="auto" autoPlay ref={(el) => el && setAudioSource(key, el)} />
+      ))}
+    </>
+  );
+};
+
 function App() {
   const audioStreams: { [key: string]: MediaStream } = {};
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
@@ -197,6 +210,7 @@ function App() {
 
   return (
     <AppContainer>
+      <AudioList streams={audioStreams} />
       <Sidebar>
         <TeamList
           team={team}
