@@ -15,7 +15,7 @@
 	let id1 = 'yd8no3h8zp000004';
 	let id2 = 'yd8no3h8zp000005';
 	let id3 = 'yd8no3h8zp000006';
-	const me = new Peer({host: '46.101.239.193', port: 9000});
+	const me = new Peer({host: 'emergency.walmoo.com', port: 9000, secure: true});
 	// const me = new Peer({host: 'localhost', port: 9000});
 	me.on('open', on_peer_open);
 	const talk = new Set();
@@ -36,7 +36,7 @@
 		call.on('stream', remoteStream => {
 			debugger;
 			console.log('connected initiated');
-			audio.srcObject = remoteStream;
+			// audio.srcObject = remoteStream;
 		});
 		// setTimeout(() => {
 		// 	console.log('closing call');
