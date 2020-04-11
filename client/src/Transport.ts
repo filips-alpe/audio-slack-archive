@@ -17,7 +17,6 @@ export class Transport {
 	status = UserStatus.AVAILABLE;
 	public isPrivateTalk = false;
 
-	id?: string;
 	stream?: MediaStream;
 
 	onStatusChange: (id: string, status: UserStatus) => void;
@@ -59,23 +58,23 @@ export class Transport {
 		}
 	}
 
-	private onPeerOpen(id: string) {
+	private onPeerOpen = (id: string) => {
 		this.initStream();
-		this.id = id;
 		this.peerApp.listAllPeers(this.initPeers);
-	}
+		console.log(`onPeerOpen ${id}`);
+	};
 
-	private onPeerConnection(conn: DataConnection) {
+	private onPeerConnection = (conn: DataConnection) => {
 		this.peers[conn.peer] = {conn, status: UserStatus.AVAILABLE};
 		conn.send({type: 'status', status: this.status});
 		this.setConnection(conn);
-	}
+	};
 
-	private initPeers(ids: string[]) {
+	private initPeers = (ids: string[]) => {
 		ids.forEach(id => this.setConnection(this.peerApp.connect(id)));
-	}
+	};
 
-	private setConnection(conn: DataConnection) {
+	private setConnection = (conn: DataConnection) => {
 		conn.on('close', () => {
 			const peer = this.peers[conn.peer];
 			peer.conn = undefined;
@@ -96,9 +95,9 @@ export class Transport {
 					break;
 			}
 		});
-	}
+	};
 
-	private setCall(call: MediaConnection) {
+	private setCall = (call: MediaConnection) => {
 		call.on('stream', remoteStream => {
 			this.talk[call.peer] = call;
 			if (this.status !== UserStatus.CONNECTED) {
@@ -115,22 +114,22 @@ export class Transport {
 				this.onStatusChange(call.peer, UserStatus.AVAILABLE);
 			}
 		});
-	}
+	};
 
 	private async initStream() {
 		this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
 	}
 
-	private askToCall(id: string) {
+	private askToCall = (id: string) => {
 		for (let conn of Object.values(this.talk)) {
 			const peer = this.peers[conn.peer];
 			if (peer.conn) {
 				peer.conn.send({type: 'call', call: id})
 			}
 		}
-	}
+	};
 
-	private onCall(call: MediaConnection) {
+	private onCall = (call: MediaConnection) => {
 		if (
 			(this.isPrivateTalk && this.status === UserStatus.CONNECTED) ||
 			this.status === UserStatus.UNAVAILABLE ||
