@@ -10,15 +10,17 @@ type MessageType = { type: 'call' | 'status' };
 type CallMessage = { callId: string } & MessageType;
 type StatusMessage = Status & MessageType;
 
+export type Peers = { [key: string]: { conn?: DataConnection } & Status };
+
 export interface TransportOptions {
-	onStatusChange: (id: string, status: UserStatus) => void;
+	onPeersChanged: (peers: Peers) => void;
 	onBusy: (id: string) => void;
 	setAudioStream: (stream: MediaStream | null) => void;
 }
 
 export class Transport {
 	peerApp = new Peer({host: HOST, port: PORT, secure: true});
-	peers: { [key: string]: { conn?: DataConnection } & Status } = {};
+	public peers: Peers = {};
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
 	private setAudioStream: (stream: MediaStream | null) => void;
@@ -26,11 +28,11 @@ export class Transport {
 
 	stream?: MediaStream;
 
-	onStatusChange: (id: string, status: UserStatus) => void;
+	onPeersChanged: (peers: Peers) => void;
 	onBusy: (id: string) => void;
 
 	constructor(options: TransportOptions) {
-		this.onStatusChange = options.onStatusChange;
+		this.onPeersChanged = options.onPeersChanged;
 		this.onBusy = options.onBusy;
 		this.setAudioStream = options.setAudioStream;
 		this.peerApp.on('open', this.onPeerOpen);
@@ -100,7 +102,7 @@ export class Transport {
 						let nextStatus = (data as StatusMessage).status;
 						debugger;
 						this.peers[conn.peer].status = nextStatus;
-						this.onStatusChange(conn.peer, nextStatus);
+						this.onPeersChanged(this.peers);
 					}
 					break;
 				case 'call':
@@ -116,7 +118,7 @@ export class Transport {
 			if (this.status !== UserStatus.CONNECTED) {
 				this.setStatus(UserStatus.CONNECTED);
 			}
-			this.onStatusChange(call.peer, UserStatus.CONNECTED);
+			this.onPeersChanged(this.peers);
 			this.setAudioStream(remoteStream);
 		});
 		call.on('close', () => {
@@ -124,7 +126,7 @@ export class Transport {
 			delete this.talk[call.peer];
 			if (!Object.keys(this.talk).length) {
 				this.setStatus(UserStatus.AVAILABLE);
-				this.onStatusChange(call.peer, UserStatus.AVAILABLE);
+				this.onPeersChanged(this.peers);
 			}
 		});
 	};
