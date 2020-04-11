@@ -1,4 +1,5 @@
 import {PeerServer} from "peer";
+import {readFileSync} from "fs";
 
 const ids: Set<string> = new Set();
 const skipedIds: string[] = [];
@@ -13,7 +14,15 @@ const nextId: () => string = () => {
 	ids.add(id);
 	return id;
 };
-const peerServer = PeerServer({port: 9000, allow_discovery: true, generateClientId: nextId});
+const peerServer = PeerServer({
+	port: 9000,
+	allow_discovery: true,
+	generateClientId: nextId,
+	ssl: {
+		key: readFileSync('privkey.pem').toString(),
+		cert: readFileSync('fullchain.pem').toString()
+	}
+});
 
 peerServer.on('connection', conn => console.log(`connected ${conn.getId()}`));
 peerServer.on('disconnect', conn => {
