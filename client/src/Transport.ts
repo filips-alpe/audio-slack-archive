@@ -86,6 +86,7 @@ export class Transport {
 				case "status":
 					if (!(conn.peer in this.talk)) {
 						let nextStatus = (<StatusMessage>data).status;
+						debugger;
 						this.peers[conn.peer].status = nextStatus;
 						this.onStatusChange(conn.peer, nextStatus);
 					}

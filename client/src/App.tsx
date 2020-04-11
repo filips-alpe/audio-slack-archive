@@ -149,13 +149,12 @@ const renderUserCard = (user: User, status: UserStatus, onClick?: () => void) =>
   </UserCard>
 );
 
+const transport = new Transport(
+  (id, status)=>console.log(`peer ${id} new status ${status}`),
+  (id)=>console.log(`peer ${id} calling, but i am busy`),
+);
+
 function App() {
-
-  const transport = new Transport(
-    (id, status)=>console.log(`peer ${id} new status ${status}`),
-    (id)=>console.log(`peer ${id} calling, but i am busy`),
-  );
-
 
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
