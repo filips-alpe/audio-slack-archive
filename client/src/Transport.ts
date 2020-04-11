@@ -1,7 +1,7 @@
 import Peer, { DataConnection, MediaConnection } from 'peerjs';
 import { UserStatus } from './data';
 
-const HOST = 'energency.walmoo.com';
+const HOST = 'emergency.walmoo.com';
 const PORT = 9000;
 
 type Status = { status: UserStatus };
