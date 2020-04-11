@@ -174,6 +174,14 @@ function App() {
   const [muted, setMuted] = React.useState(false);
   const [, setPeers] = React.useState<Peers>({});
 
+  const [time, setTime] = React.useState(Date.now());
+
+  React.useEffect(() => {
+    setTimeout(() => {
+      setTime(Date.now());
+    }, 1000);
+  });
+
   const transport = getTransport({
     onPeersChanged: (newPeers: Peers) => {
       setPeers(newPeers);
