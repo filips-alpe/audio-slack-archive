@@ -23,11 +23,10 @@ export class Transport {
 	public peers: Peers = {};
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
-	private renderAudioStream: (stream: MediaStream) => () => void;
 	public isPrivateTalk = false;
-
 	stream?: MediaStream;
 
+	renderAudioStream: (stream: MediaStream) => () => void;
 	onPeersChanged: (peers: Peers) => void;
 	onBusy: (id: string) => void;
 
@@ -119,15 +118,15 @@ export class Transport {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onPeersChanged(this.peers);
-			this.renderAudioStream(remoteStream);
-		});
-		call.on('close', () => {
-			// remove streams
-			delete this.talk[call.peer];
-			if (!Object.keys(this.talk).length) {
-				this.setStatus(UserStatus.AVAILABLE);
-				this.onPeersChanged(this.peers);
-			}
+			const remove_stream = this.renderAudioStream(remoteStream);
+			call.on('close', () => {
+				remove_stream();
+				delete this.talk[call.peer];
+				if (!Object.keys(this.talk).length) {
+					this.setStatus(UserStatus.AVAILABLE);
+					this.onPeersChanged(this.peers);
+				}
+			});
 		});
 	};
 
