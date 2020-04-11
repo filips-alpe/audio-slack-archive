@@ -16,12 +16,12 @@
 	let id2 = 'yd8no3h8zp000005';
 	let id3 = 'yd8no3h8zp000006';
 	// const me = new Peer(id1, {host: 'emergency.walmoo.com', port: 9000, secure: true, debug: 3});
-	const me = new Peer(id1);
+	const me = new Peer(id1,{ 'iceServers': [{ 'urls': ['stun:stun.l.google.com:19302'] }] });
 	const talk = new Set();
 	me.on('open', on_peer_open);
 
 	function on_peer_open() {
-		me.listAllPeers(peers => console.log(`online ids ${peers}`));
+		// me.listAllPeers(peers => console.log(`online ids ${peers}`));
 		debugger;
 		navigator.mediaDevices.getUserMedia({audio: true})
 		.then(stream => {
