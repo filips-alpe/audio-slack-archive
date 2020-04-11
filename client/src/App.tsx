@@ -172,7 +172,7 @@ function App() {
   const [team, setActiveTeam] = React.useState<Team>(teams[0]);
   const [status, setComponentStatus] = React.useState<UserStatus>(UserStatus.AVAILABLE);
   const [muted, setMuted] = React.useState(false);
-  const [peers, setPeers] = React.useState<Peers>({});
+  const [, setPeers] = React.useState<Peers>({});
 
   const transport = getTransport({
     onPeersChanged: (newPeers: Peers) => {
@@ -197,7 +197,12 @@ function App() {
   };
 
   const getStatus = (user: User) => {
-    if (Object.keys(transportState.peers).includes(user.id)) {
+    const talkingTo = Object.keys(transportState.talk);
+    const available = Object.keys(transportState.peers);
+    if (talkingTo.includes(user.id)) {
+      return UserStatus.CONNECTED;
+    }
+    if (available.includes(user.id)) {
       return UserStatus.AVAILABLE;
     }
     if (user.id === transportState.myId) {
