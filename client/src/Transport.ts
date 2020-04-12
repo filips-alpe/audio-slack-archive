@@ -113,9 +113,13 @@ class Transport {
 			switch (data.type) {
 				case 'status':
 					if (!(conn.peer in this.talk)) {
-						this.peers[conn.peer].status = (data as StatusMessage).status;
-						this.onPeersChanged();
+						let status = (data as StatusMessage).status;
+						if(status===UserStatus.CONNECTED){
+							status = UserStatus.UNAVAILABLE;
+						}
+						this.peers[conn.peer].status = status;
 					}
+					this.onPeersChanged();
 					break;
 				case 'call':
 					this.call((data as CallMessage).callId, false);
@@ -160,10 +164,8 @@ class Transport {
 	};
 
 	private onCall = (call: MediaConnection) => {
-		if (
-			(this.isPrivateTalk && this.status === UserStatus.CONNECTED) ||
-			this.status === UserStatus.UNAVAILABLE
-		) {
+		//TODO if joining other conversation must join all peers. must figure out who is in that talk
+		if (this.status === UserStatus.CONNECTED ||this.status === UserStatus.UNAVAILABLE) {
 			this.onBusy(call.peer);
 			return;
 		}
