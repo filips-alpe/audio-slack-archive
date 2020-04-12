@@ -24,9 +24,8 @@ type StatusMessage = Status & MessageType;
 export type Peers = { [key: string]: { conn?: DataConnection } & Status };
 
 export interface TransportOptions {
-	onPeersChanged: (peers: Peers) => void;
+	onPeersChanged: () => void;
 	onBusy: (id: string) => void;
-	renderAudioStream: (stream: MediaStream) => () => void;
 }
 
 class Transport {
@@ -36,33 +35,23 @@ class Transport {
 	peerApp = new Peer({host: HOST, port: PORT, secure: true, config: CONFIG});
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
-	stream?: MediaStream;
-	myId?: string;
+	stream: MediaStream = new MediaStream();
+	myId: string = '-1';
 
-	renderAudioStream: (stream: MediaStream) => () => void;
-	onPeersChanged: (peers: Peers) => void;
+	onPeersChanged: () => void;
 	onBusy: (id: string) => void;
 
 	constructor(options: TransportOptions) {
 		this.onPeersChanged = options.onPeersChanged;
 		this.onBusy = options.onBusy;
-		this.renderAudioStream = options.renderAudioStream;
 		this.peerApp.on('open', this.onPeerOpen);
 		this.peerApp.on('connection', this.onPeerConnection);
 		this.peerApp.on('call', this.onCall);
 	}
 
-	public getState() {
-		return {
-			myId: this.myId,
-			status: this.status,
-			talk: this.talk,
-			peers: this.peers,
-		};
-	}
-
 	public call(id: string, join = true) {
-		if (this.stream && this.myId && this.myId != id) {
+		debugger;
+		if (this.myId !== id) {
 			this.setCall(this.peerApp.call(id, this.stream));
 			if (join) {
 				this.askToCall(id);
@@ -70,11 +59,11 @@ class Transport {
 		}
 	}
 
-	public hangUp() {
+	public hangUp=() =>{
 		for (let conn of Object.values(this.talk)) {
 			conn.close();
 		}
-	}
+	};
 
 	public setStatus(status: UserStatus) {
 		this.status = status;
@@ -98,6 +87,7 @@ class Transport {
 			}),
 		);
 		console.log(`onPeerOpen ${myId}`);
+		this.onPeersChanged();
 	};
 
 	private onPeerConnection = (conn: DataConnection) => {
@@ -110,21 +100,21 @@ class Transport {
 	};
 
 	private setConnection = (conn: DataConnection) => {
+		this.onPeersChanged();
 		conn.on('close', () => {
 			// debugger;
 			const peer = this.peers[conn.peer];
 			peer.conn = undefined;
 			peer.status = UserStatus.UNAVAILABLE;
+			this.onPeersChanged();
 		});
 		//TODO need pattern matching
 		conn.on('data', (data: MessageType) => {
 			switch (data.type) {
 				case 'status':
 					if (!(conn.peer in this.talk)) {
-						let nextStatus = (data as StatusMessage).status;
-						// debugger;
-						this.peers[conn.peer].status = nextStatus;
-						this.onPeersChanged(this.peers);
+						this.peers[conn.peer].status = (data as StatusMessage).status;
+						this.onPeersChanged();
 					}
 					break;
 				case 'call':
@@ -141,17 +131,17 @@ class Transport {
 			if (this.status !== UserStatus.CONNECTED) {
 				this.setStatus(UserStatus.CONNECTED);
 			}
-			this.onPeersChanged(this.peers);
-			// debugger;
-			const remove_stream = this.renderAudioStream(remoteStream);
+			this.onPeersChanged();
+			debugger;
+			addAudioStream(remoteStream);
 			call.on('close', () => {
-				remove_stream();
 				delete this.talk[call.peer];
 				this.peers[call.peer].status = UserStatus.AVAILABLE;
 				if (!Object.keys(this.talk).length) {
 					this.setStatus(UserStatus.AVAILABLE);
 				}
-				this.onPeersChanged(this.peers);
+				this.onPeersChanged();
+				removeAudioStream(remoteStream)
 			});
 		});
 	};
@@ -172,8 +162,7 @@ class Transport {
 	private onCall = (call: MediaConnection) => {
 		if (
 			(this.isPrivateTalk && this.status === UserStatus.CONNECTED) ||
-			this.status === UserStatus.UNAVAILABLE ||
-			!this.stream
+			this.status === UserStatus.UNAVAILABLE
 		) {
 			this.onBusy(call.peer);
 			return;
@@ -183,8 +172,25 @@ class Transport {
 	};
 }
 
+const addAudioStream = (stream: MediaStream) => {
+	debugger;
+	const audio = document.createElement('audio');
+	audio.id = stream.id;
+	audio.setAttribute('autoplay', 'autoplay');
+	audio.setAttribute('preload', 'auto');
+	audio.srcObject = stream;
+};
+
+const removeAudioStream = (stream: MediaStream) => {
+	debugger;
+	const audio = document.getElementById(stream.id);
+	if (audio) {
+		audio.remove();
+	}
+};
+
 let transport: Transport;
-export const getInstance = (options: TransportOptions) => {
+export const getTransport = (options: TransportOptions) => {
 	if (!transport) {
 		transport = new Transport(options);
 	}
