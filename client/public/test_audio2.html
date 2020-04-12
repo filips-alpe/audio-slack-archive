@@ -17,11 +17,11 @@
 	const me = new Peer({
 		config: {
 			iceServers: [
-				{url: 'stun:stun.l.google.com:19302'},
+				{urls: 'stun:stun.l.google.com:19302'},
 				{
-					url: 'turn:ec2-35-156-252-206.eu-central-1.compute.amazonaws.com:3478',
-					username: 'test',
-					credential: 'test'
+					urls: 'turn:ec2-35-156-252-206.eu-central-1.compute.amazonaws.com:3478',
+					username: 'test1',
+					credential: 'test1'
 				}]
 		}
 	});

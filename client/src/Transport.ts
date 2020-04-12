@@ -3,6 +3,17 @@ import {UserStatus} from './data';
 
 const HOST = 'emergency.walmoo.com';
 const PORT = 9000;
+const CONFIG = {
+	iceServers: [
+		{urls: 'stun:stun.l.google.com:19302'},
+		{
+			urls: 'turn:ec2-35-156-252-206.eu-central-1.compute.amazonaws.com:3478',
+			username: 'test',
+			credential: 'test'
+		}
+	]
+};
+
 
 type Status = { status: UserStatus };
 
@@ -22,13 +33,7 @@ class Transport {
 	public peers: Peers = {};
 	public isPrivateTalk = false;
 
-	peerApp = new Peer({
-			host: HOST,
-			port: PORT,
-			secure: true,
-			config: {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]}
-		}
-	);
+	peerApp = new Peer({host: HOST, port: PORT, secure: true, config: CONFIG});
 	talk: { [key: string]: MediaConnection } = {};
 	status = UserStatus.AVAILABLE;
 	stream?: MediaStream;
@@ -47,14 +52,14 @@ class Transport {
 		this.peerApp.on('call', this.onCall);
 	}
 
-  public getState() {
-    return {
-      myId: this.myId,
-      status: this.status,
-      talk: this.talk,
-      peers: this.peers,
-    };
-  }
+	public getState() {
+		return {
+			myId: this.myId,
+			status: this.status,
+			talk: this.talk,
+			peers: this.peers,
+		};
+	}
 
 	public call(id: string, join = true) {
 		if (this.stream && this.myId && this.myId != id) {
