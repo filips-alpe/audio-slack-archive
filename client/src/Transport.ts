@@ -50,7 +50,6 @@ class Transport {
 	}
 
 	public call(id: string, join = true) {
-		debugger;
 		if (this.myId !== id) {
 			this.setCall(this.peerApp.call(id, this.stream));
 			if (join) {
@@ -92,7 +91,6 @@ class Transport {
 
 	private onPeerConnection = (conn: DataConnection) => {
 		this.peers[conn.peer] = {conn, status: UserStatus.AVAILABLE};
-		// debugger;
 		conn.on('open', () => {
 			this.setConnection(conn);
 			conn.send({type: 'status', status: this.status});
@@ -102,7 +100,6 @@ class Transport {
 	private setConnection = (conn: DataConnection) => {
 		this.onPeersChanged();
 		conn.on('close', () => {
-			// debugger;
 			const peer = this.peers[conn.peer];
 			peer.conn = undefined;
 			peer.status = UserStatus.UNAVAILABLE;
@@ -130,17 +127,17 @@ class Transport {
 
 	private setCall = (call: MediaConnection) => {
 		call.on('stream', (remoteStream) => {
+			debugger;
 			this.talk[call.peer] = call;
 			this.peers[call.peer].status = UserStatus.CONNECTED;
 			if (this.status !== UserStatus.CONNECTED) {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onPeersChanged();
-			debugger;
 			addAudioStream(remoteStream);
 			call.on('close', () => {
 				delete this.talk[call.peer];
-				this.peers[call.peer].status = UserStatus.AVAILABLE;
+				this.peers[call.peer].status = UserStatus.UNAVAILABLE;
 				if (!Object.keys(this.talk).length) {
 					this.setStatus(UserStatus.AVAILABLE);
 				}
@@ -158,13 +155,14 @@ class Transport {
 		for (let conn of Object.values(this.talk)) {
 			const peer = this.peers[conn.peer];
 			if (peer.conn) {
-				peer.conn.send({type: 'call', call: id});
+				peer.conn.send({type: 'call', callId: id});
 			}
 		}
 	};
 
 	private onCall = (call: MediaConnection) => {
 		//TODO if joining other conversation must join all peers. must figure out who is in that talk
+		debugger;
 		if (this.status === UserStatus.CONNECTED ||this.status === UserStatus.UNAVAILABLE) {
 			this.onBusy(call.peer);
 			return;
@@ -175,7 +173,6 @@ class Transport {
 }
 
 const addAudioStream = (stream: MediaStream) => {
-	debugger;
 	const audio = document.createElement('audio');
 	audio.id = stream.id;
 	audio.setAttribute('autoplay', 'autoplay');
