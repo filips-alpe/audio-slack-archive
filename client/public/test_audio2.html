@@ -15,13 +15,16 @@
 	let id2 = 'yd8no3h8zp000005';
 	let id3 = 'yd8no3h8zp000006';
 	const me = new Peer({
-			config: {
-				iceServers: [
-					{url: 'stun:stun.l.google.com:19302'},
-					{url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo'}
-				]
-			}
-		});
+		config: {
+			iceServers: [
+				{url: 'stun:stun.l.google.com:19302'},
+				{
+					url: 'turn:ec2-35-156-252-206.eu-central-1.compute.amazonaws.com:3478',
+					username: 'test',
+					credential: 'test'
+				}]
+		}
+	});
 	// const me = new Peer({host: 'emergency.walmoo.com', port: 9000, secure: true});
 	// const me = new Peer({host: 'localhost', port: 9000});
 	me.on('open', on_peer_open);

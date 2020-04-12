@@ -20,7 +20,11 @@
 		config: {
 			iceServers: [
 				{url: 'stun:stun.l.google.com:19302'},
-				{url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo'}
+				{
+					url: 'turn:ec2-35-156-252-206.eu-central-1.compute.amazonaws.com:3478',
+					username: 'test',
+					credential: 'test'
+				}
 			]
 		}
 	});
