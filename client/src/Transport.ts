@@ -58,8 +58,11 @@ class Transport {
 		}
 	}
 
-	public hangUp=() =>{
+	public hangUp = () => {
+		const nextPeerStatus = Object.keys(this.talk).length === 1 ? UserStatus.AVAILABLE : UserStatus.UNAVAILABLE;
 		for (let conn of Object.values(this.talk)) {
+			this.peers[conn.peer].status = nextPeerStatus;
+			delete this.talk[conn.peer];
 			conn.close();
 		}
 	};
@@ -111,7 +114,7 @@ class Transport {
 				case 'status':
 					if (!(conn.peer in this.talk)) {
 						let status = (data as StatusMessage).status;
-						if(status===UserStatus.CONNECTED){
+						if (status === UserStatus.CONNECTED) {
 							status = UserStatus.UNAVAILABLE;
 						}
 						this.peers[conn.peer].status = status;
@@ -127,22 +130,23 @@ class Transport {
 
 	private setCall = (call: MediaConnection) => {
 		call.on('stream', (remoteStream) => {
-			debugger;
 			this.talk[call.peer] = call;
 			this.peers[call.peer].status = UserStatus.CONNECTED;
 			if (this.status !== UserStatus.CONNECTED) {
 				this.setStatus(UserStatus.CONNECTED);
 			}
 			this.onPeersChanged();
-			addAudioStream(remoteStream);
+			const audio = addAudioStream(remoteStream);
 			call.on('close', () => {
-				delete this.talk[call.peer];
-				this.peers[call.peer].status = UserStatus.UNAVAILABLE;
+				if (call.peer in this.talk) {
+					delete this.talk[call.peer];
+					this.peers[call.peer].status = UserStatus.AVAILABLE;
+				}
 				if (!Object.keys(this.talk).length) {
 					this.setStatus(UserStatus.AVAILABLE);
 				}
 				this.onPeersChanged();
-				removeAudioStream(remoteStream)
+				audio.remove();
 			});
 		});
 	};
@@ -162,8 +166,8 @@ class Transport {
 
 	private onCall = (call: MediaConnection) => {
 		//TODO if joining other conversation must join all peers. must figure out who is in that talk
-		debugger;
-		if (this.status === UserStatus.CONNECTED ||this.status === UserStatus.UNAVAILABLE) {
+		// if (this.status === UserStatus.CONNECTED || this.status === UserStatus.UNAVAILABLE) {
+		if (this.status === UserStatus.UNAVAILABLE) {
 			this.onBusy(call.peer);
 			return;
 		}
@@ -178,14 +182,7 @@ const addAudioStream = (stream: MediaStream) => {
 	audio.setAttribute('autoplay', 'autoplay');
 	audio.setAttribute('preload', 'auto');
 	audio.srcObject = stream;
-};
-
-const removeAudioStream = (stream: MediaStream) => {
-	debugger;
-	const audio = document.getElementById(stream.id);
-	if (audio) {
-		audio.remove();
-	}
+	return audio;
 };
 
 let transport: Transport;
